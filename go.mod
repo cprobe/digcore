@@ -10,6 +10,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/toolkits/pkg v1.3.11
 	go.uber.org/zap v1.27.1
+	nhooyr.io/websocket v1.8.17
 )
 
 require (

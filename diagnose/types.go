@@ -99,14 +99,15 @@ const (
 
 // ProgressEvent carries details about one progress milestone in a diagnosis run.
 type ProgressEvent struct {
-	Type      ProgressEventType
-	Round     int
-	ToolName  string
-	ToolArgs  string
-	Reasoning string        // non-empty on AIDone when the model emits reasoning
-	Duration  time.Duration // set on AIDone / ToolDone
-	ResultLen int           // set on ToolDone
-	IsError   bool          // set on ToolDone
+	Type       ProgressEventType
+	Round      int
+	ToolName   string
+	ToolArgs   string
+	Reasoning  string        // non-empty on AIDone when the model emits reasoning
+	Duration   time.Duration // set on AIDone / ToolDone
+	ResultLen  int           // set on ToolDone
+	IsError    bool          // set on ToolDone
+	ToolOutput string        // set on ToolDone; the tool result content
 }
 
 // ProgressCallback receives progress events during a diagnosis run.

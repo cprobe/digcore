@@ -355,13 +355,14 @@ func (e *DiagnoseEngine) diagnose(ctx context.Context, req *DiagnoseRequest, ses
 			truncated := TruncateOutput(result)
 
 			emitProgress(progress, ProgressEvent{
-				Type:      ProgressToolDone,
-				Round:     round + 1,
-				ToolName:  tc.Function.Name,
-				ToolArgs:  argsDisplay,
-				Duration:  toolElapsed,
-				ResultLen: len(result),
-				IsError:   isErr,
+				Type:       ProgressToolDone,
+				Round:      round + 1,
+				ToolName:   tc.Function.Name,
+				ToolArgs:   argsDisplay,
+				Duration:   toolElapsed,
+				ResultLen:  len(result),
+				IsError:    isErr,
+				ToolOutput: truncated,
 			})
 
 			messages = append(messages, aiclient.Message{
