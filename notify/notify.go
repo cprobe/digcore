@@ -1,6 +1,8 @@
 package notify
 
 import (
+	"sync"
+
 	"github.com/cprobe/digcore/logger"
 	"github.com/cprobe/digcore/types"
 )
@@ -24,11 +26,25 @@ func Forward(event *types.Event) bool {
 		return false
 	}
 
-	anyOk := false
-	for _, n := range notifiers {
-		if n.Forward(event) {
-			anyOk = true
+	if len(notifiers) == 1 {
+		return notifiers[0].Forward(event)
+	}
+
+	var wg sync.WaitGroup
+	results := make([]bool, len(notifiers))
+	for i, n := range notifiers {
+		wg.Add(1)
+		go func(idx int, notifier Notifier) {
+			defer wg.Done()
+			results[idx] = notifier.Forward(event)
+		}(i, n)
+	}
+	wg.Wait()
+
+	for _, ok := range results {
+		if ok {
+			return true
 		}
 	}
-	return anyOk
+	return false
 }

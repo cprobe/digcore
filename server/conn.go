@@ -111,7 +111,7 @@ func Run(ctx context.Context, startTime time.Time, plugins []string, agentVersio
 		return fmt.Errorf("resolve server websocket url: %w", err)
 	}
 
-	agentID, err := loadOrCreateAgentID()
+	agentID, err := config.LoadOrCreateAgentID()
 	if err != nil {
 		return fmt.Errorf("load agent_id: %w", err)
 	}
@@ -143,9 +143,9 @@ func Run(ctx context.Context, startTime time.Time, plugins []string, agentVersio
 		startTime:    startTime,
 		plugins:      plugins,
 		agentVersion: agentVersion,
-		sendCh:    make(chan []byte, sendChSize),
-		done:      make(chan struct{}),
-		sessions:  newSessionManager(),
+		sendCh:       make(chan []byte, sendChSize),
+		done:         make(chan struct{}),
+		sessions:     newSessionManager(),
 	}
 
 	logger.Logger.Infow("server_connected", "agent_id", agentID)
@@ -452,7 +452,9 @@ func (c *Conn) recvAck(ctx context.Context) (*ackPayload, error) {
 
 func buildHeaders(cfg config.ServerConfig, agentID uuid.UUID) http.Header {
 	h := http.Header{}
-	h.Set("X-Agent-Token", cfg.AgentToken)
+	if cfg.AgentToken != "" {
+		h.Set("X-Agent-Token", cfg.AgentToken)
+	}
 	h.Set("X-Agent-ID", agentID.String())
 	h.Set("X-Proto-Version", "1")
 	return h

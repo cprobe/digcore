@@ -81,6 +81,47 @@ func TestServerClientChat(t *testing.T) {
 	}
 }
 
+func TestServerClientChatWithoutToken(t *testing.T) {
+	stateDir := t.TempDir()
+	config.Config = &config.ConfigType{StateDir: stateDir}
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Values("X-Agent-Token"); len(got) != 0 {
+			t.Fatalf("X-Agent-Token header present = %v, want absent", got)
+		}
+		if got := r.Header.Get("X-Agent-ID"); got == "" {
+			t.Fatal("X-Agent-ID is empty")
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(gatewayEnvelope{
+			Data: &GatewayChatData{
+				ID:           "resp-no-token",
+				Message:      Message{Role: "assistant", Content: "ok"},
+				FinishReason: "stop",
+			},
+		})
+	}))
+	defer srv.Close()
+
+	client, err := NewServerClient(GatewayClientConfig{
+		BaseURL:        srv.URL,
+		Scene:          "chat",
+		RequestTimeout: time.Second,
+	})
+	if err != nil {
+		t.Fatalf("NewServerClient() error: %v", err)
+	}
+
+	resp, err := client.Chat(context.Background(), []Message{{Role: "user", Content: "hi"}}, nil)
+	if err != nil {
+		t.Fatalf("Chat() error: %v", err)
+	}
+	if resp.ID != "resp-no-token" {
+		t.Fatalf("response id = %q, want resp-no-token", resp.ID)
+	}
+}
+
 func TestServerClientChatError(t *testing.T) {
 	config.Config = &config.ConfigType{StateDir: t.TempDir()}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

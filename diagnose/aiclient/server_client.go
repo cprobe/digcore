@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	agentserver "github.com/cprobe/digcore/server"
+	"github.com/cprobe/digcore/config"
 )
 
 type GatewayClientConfig struct {
@@ -32,7 +32,7 @@ type ServerClient struct {
 }
 
 func NewServerClient(cfg GatewayClientConfig) (*ServerClient, error) {
-	agentID, err := agentserver.LoadOrCreateAgentID()
+	agentID, err := config.LoadOrCreateAgentID()
 	if err != nil {
 		return nil, fmt.Errorf("load agent_id: %w", err)
 	}
@@ -70,7 +70,9 @@ func (c *ServerClient) Chat(ctx context.Context, messages []Message, tools []Too
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Agent-Token", c.agentToken)
+	if c.agentToken != "" {
+		req.Header.Set("X-Agent-Token", c.agentToken)
+	}
 	req.Header.Set("X-Agent-ID", c.agentID)
 	req.Header.Set("X-Agent-Scene", c.scene)
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/koding/multiconfig"
@@ -44,7 +45,8 @@ func GuessFormat(fpath string) ConfigFormat {
 
 func LoadConfigByDir(configDir string, configPtr interface{}) error {
 	var (
-		tBuf []byte
+		tomlFiles  []string
+		localTomls []string
 	)
 
 	loaders := []multiconfig.Loader{
@@ -56,25 +58,25 @@ func LoadConfigByDir(configDir string, configPtr interface{}) error {
 	if err != nil {
 		return fmt.Errorf("failed to list files under: %s : %v", configDir, err)
 	}
-	s := NewFileScanner()
 	for _, fpath := range files {
 		switch {
 		case strings.HasSuffix(fpath, ".toml"):
-			s.Read(path.Join(configDir, fpath))
-			tBuf = append(tBuf, s.Data()...)
-			tBuf = append(tBuf, []byte("\n")...)
+			if isLocalOverrideToml(fpath) {
+				localTomls = append(localTomls, fpath)
+			} else {
+				tomlFiles = append(tomlFiles, fpath)
+			}
 		case strings.HasSuffix(fpath, ".json"):
 			loaders = append(loaders, &multiconfig.JSONLoader{Path: path.Join(configDir, fpath)})
 		case strings.HasSuffix(fpath, ".yaml") || strings.HasSuffix(fpath, ".yml"):
 			loaders = append(loaders, &multiconfig.YAMLLoader{Path: path.Join(configDir, fpath)})
 		}
-		if s.Err() != nil {
-			return s.Err()
-		}
 	}
 
-	if len(tBuf) != 0 {
-		loaders = append(loaders, &multiconfig.TOMLLoader{Reader: bytes.NewReader(tBuf)})
+	sort.Strings(tomlFiles)
+	sort.Strings(localTomls)
+	for _, fpath := range append(tomlFiles, localTomls...) {
+		loaders = append(loaders, &multiconfig.TOMLLoader{Path: path.Join(configDir, fpath)})
 	}
 
 	m := multiconfig.DefaultLoader{
@@ -82,6 +84,10 @@ func LoadConfigByDir(configDir string, configPtr interface{}) error {
 		Validator: multiconfig.MultiValidator(&multiconfig.RequiredValidator{}),
 	}
 	return m.Load(configPtr)
+}
+
+func isLocalOverrideToml(name string) bool {
+	return strings.HasSuffix(strings.ToLower(name), ".local.toml")
 }
 
 func LoadConfigs(configs []ConfigWithFormat, configPtr interface{}) error {

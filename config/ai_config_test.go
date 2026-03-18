@@ -160,12 +160,13 @@ func TestAIConfigValidate(t *testing.T) {
 		{
 			name: "gateway enabled without agent_token",
 			cfg: AIConfig{
-				Enabled:       true,
-				ModelPriority: []string{"m"},
-				Models:        map[string]ModelConfig{"m": {BaseURL: "http://x", APIKey: "k"}},
-				Gateway:       GatewayConfig{Enabled: true, BaseURL: "http://brain/api/v1/agent/llm"},
+				Enabled:         true,
+				ModelPriority:   []string{"m"},
+				Models:          map[string]ModelConfig{"m": {BaseURL: "http://x", APIKey: "k"}},
+				QueueFullPolicy: "drop",
+				Gateway:         GatewayConfig{Enabled: true, BaseURL: "http://brain/api/v1/agent/llm"},
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "gateway enabled with invalid max_retries",

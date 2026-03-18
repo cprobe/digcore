@@ -142,7 +142,7 @@ func (f *FlashdutyNotifier) doPost(alertKey string, payload []byte) (bool, bool)
 		return false, false
 	}
 
-	logger.Logger.Infow("flashduty: forward completed",
+	logger.Logger.Debugw("flashduty: forward completed",
 		"event_key", alertKey,
 		"request_payload", string(payload),
 		"response_status", res.StatusCode,

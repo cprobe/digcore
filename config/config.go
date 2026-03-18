@@ -333,7 +333,6 @@ func AgentIP() string {
 				return ip
 			}
 		}
-		return DetectIP()
 	}
 
 	identMu.Lock()
@@ -356,7 +355,6 @@ func AgentHostname() string {
 				return h
 			}
 		}
-		return DetectHostname()
 	}
 
 	identMu.Lock()
@@ -514,9 +512,6 @@ func (c *AIConfig) Validate() error {
 	if c.Gateway.Enabled {
 		if c.Gateway.BaseURL == "" {
 			return fmt.Errorf("[ai.gateway] base_url is required when enabled=true")
-		}
-		if c.Gateway.AgentToken == "" {
-			return fmt.Errorf("[ai.gateway] agent_token is required when enabled=true (supports ${ENV_VAR} syntax)")
 		}
 		if c.Gateway.MaxRetries < 0 || c.Gateway.MaxRetries > 2 {
 			return fmt.Errorf("[ai.gateway] max_retries must be between 0 and 2, got %d", c.Gateway.MaxRetries)

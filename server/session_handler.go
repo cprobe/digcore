@@ -29,13 +29,14 @@ func (c *Conn) handleSessionStart(ctx context.Context, msg *Message) {
 		return
 	}
 
-	if concurrencyLimiter == nil {
+	engineErr := sessionStartUnavailableError(payload.SessionType)
+	if engineErr != "" {
 		logger.Logger.Warnw("session_start_acked",
 			"agent_id", c.agentID, "ref_id", msg.ID,
 			"session_id", payload.SessionID, "session_type", payload.SessionType,
 			"ok", false, "reason", "engine_unavailable",
 		)
-		c.sendACK(msg.ID, false, "diagnose engine not available")
+		c.sendACK(msg.ID, false, engineErr)
 		return
 	}
 
@@ -114,6 +115,28 @@ func (c *Conn) handleSessionInput(msg *Message) {
 	default:
 		logger.Logger.Warnw("session_input_buffer_full", "agent_id", c.agentID, "session_id", payload.SessionID)
 	}
+}
+
+func sessionStartUnavailableError(sessionType string) string {
+	if concurrencyLimiter == nil {
+		if sessionType == "chat" {
+			return "chat engine not available"
+		}
+		return "diagnose engine not available"
+	}
+
+	switch sessionType {
+	case "chat":
+		if chatRunner == nil {
+			return "chat engine not available"
+		}
+	case "inspect", "diagnose":
+		if diagnoseRunner == nil {
+			return "diagnose engine not available"
+		}
+	}
+
+	return ""
 }
 
 func (c *Conn) handleSessionCancel(msg *Message) {
