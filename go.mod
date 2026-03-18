@@ -3,7 +3,6 @@ module github.com/cprobe/digcore
 go 1.25.5
 
 require (
-	github.com/cprobe/catpaw v0.20.0
 	github.com/gobwas/glob v0.2.3
 	github.com/google/uuid v1.6.0
 	github.com/jackpal/gateway v1.1.1
