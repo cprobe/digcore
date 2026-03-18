@@ -60,6 +60,7 @@ type Conn struct {
 	ws            *websocket.Conn
 	startTime     time.Time
 	plugins       []string
+	agentVersion  string
 	sendCh        chan []byte // TODO(Phase4/5): replace with priority dual-queue (session > heartbeat/alert)
 	done          chan struct{}
 	cancel        context.CancelFunc
@@ -100,7 +101,7 @@ func (e *reconnectError) Unwrap() error {
 
 // Run performs a single connection lifecycle: dial → register → ack → loops.
 // Returns nil only when ctx is cancelled (clean shutdown).
-func Run(ctx context.Context, startTime time.Time, plugins []string) error {
+func Run(ctx context.Context, startTime time.Time, plugins []string, agentVersion string) error {
 	cfg := config.Config.Server
 	if !cfg.Enabled || cfg.Address == "" {
 		return nil
@@ -136,11 +137,12 @@ func Run(ctx context.Context, startTime time.Time, plugins []string) error {
 	ws.SetReadLimit(1 << 20) // 1 MiB
 
 	c := &Conn{
-		cfg:       cfg,
-		agentID:   agentID,
-		ws:        ws,
-		startTime: startTime,
-		plugins:   plugins,
+		cfg:          cfg,
+		agentID:      agentID,
+		ws:           ws,
+		startTime:    startTime,
+		plugins:      plugins,
+		agentVersion: agentVersion,
 		sendCh:    make(chan []byte, sendChSize),
 		done:      make(chan struct{}),
 		sessions:  newSessionManager(),
@@ -198,7 +200,7 @@ func Run(ctx context.Context, startTime time.Time, plugins []string) error {
 // Backoff strategy per proto.md §7:
 //   - Normal disconnect: 1s → 2s → ... → 300s, ±25% jitter
 //   - Auth failure (401): 60s → 120s → ... → 1800s, ±25% jitter
-func RunForever(ctx context.Context, startTime time.Time, plugins []string) {
+func RunForever(ctx context.Context, startTime time.Time, plugins []string, agentVersion string) {
 	cfg := config.Config.Server
 	if !cfg.Enabled || cfg.Address == "" {
 		return
@@ -213,7 +215,7 @@ func RunForever(ctx context.Context, startTime time.Time, plugins []string) {
 	backoff := normalMin
 
 	for {
-		err := Run(ctx, startTime, plugins)
+		err := Run(ctx, startTime, plugins, agentVersion)
 		if ctx.Err() != nil {
 			return
 		}
@@ -410,7 +412,7 @@ func (c *Conn) sendRegister(ctx context.Context) error {
 		Arch:         runtime.GOARCH,
 		Labels:       config.AgentLabels(),
 		Plugins:      c.plugins,
-		AgentVersion: config.Version,
+		AgentVersion: c.agentVersion,
 		UptimeSec:    int64(time.Since(c.startTime).Seconds()),
 	})
 	if err != nil {
