@@ -191,7 +191,6 @@ model = "gpt-4o"
 
 ## 下一步
 
-- 阅读 [MIGRATION.md](MIGRATION.md) 了解架构设计
 - 查看 [examples/](examples/) 目录获取更多示例
 - 访问 [catpaw](https://github.com/cprobe/catpaw) 查看生产级实现
 

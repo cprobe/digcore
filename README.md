@@ -25,7 +25,3 @@ go get github.com/cprobe/digcore@latest
 ## Quick Start
 
 See [examples/](examples/) for sample implementations.
-
-## License
-
-Apache License 2.0
