@@ -15,7 +15,6 @@ digcore provides the core engine for building intelligent monitoring agents that
 ## Projects built with digcore
 
 - [catpaw](https://github.com/cprobe/catpaw) - Host monitoring agent
-- k8spaw - Kubernetes monitoring (commercial)
 
 ## Installation
 

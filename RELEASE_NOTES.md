@@ -71,7 +71,6 @@ func init() {
 ## 🔗 相关项目
 
 - [catpaw](https://github.com/cprobe/catpaw) - 宿主机监控 Agent（基于 digcore）
-- k8spaw - Kubernetes 监控 Agent（商业版，基于 digcore）
 
 ## 📝 文档
 

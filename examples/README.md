@@ -71,4 +71,3 @@ func main() {
 ## More Examples
 
 - See [catpaw](https://github.com/cprobe/catpaw) for a complete host monitoring implementation
-- See k8spaw (commercial) for Kubernetes monitoring implementation
