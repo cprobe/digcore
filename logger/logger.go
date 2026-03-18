@@ -3,7 +3,7 @@ package logger
 import (
 	"time"
 
-	"github.com/cprobe/catpaw/config"
+	"github.com/cprobe/digcore/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
