@@ -49,6 +49,19 @@ type Dropper interface {
 	Drop()
 }
 
+// PluginIniter is called once on the Plugin object after config unmarshal,
+// before any Instance goroutines start. Use for shared resource initialization
+// (e.g. Informer, connection pool, leader election).
+type PluginIniter interface {
+	PluginInit() error
+}
+
+// PluginDropper is called once on the Plugin object after all Instance
+// goroutines have stopped. Use for shared resource cleanup.
+type PluginDropper interface {
+	PluginDrop()
+}
+
 type InstancesGetter interface {
 	GetInstances() []Instance
 }
@@ -62,6 +75,19 @@ func MayGather(t any, q *safe.Queue[*types.Event]) {
 func MayDrop(t any) {
 	if dropper, ok := t.(Dropper); ok {
 		dropper.Drop()
+	}
+}
+
+func MayPluginInit(t any) error {
+	if initer, ok := t.(PluginIniter); ok {
+		return initer.PluginInit()
+	}
+	return nil
+}
+
+func MayPluginDrop(t any) {
+	if dropper, ok := t.(PluginDropper); ok {
+		dropper.PluginDrop()
 	}
 }
 
