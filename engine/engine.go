@@ -19,6 +19,7 @@ import (
 
 var (
 	diagnosedKeys sync.Map // AlertKey → struct{}: tracks alerts that already triggered a diagnosis
+	FromAgent     = "unknown"
 )
 
 func PushRawEvents(pluginName string, pluginObj plugins.Plugin, ins plugins.Instance, queue *safe.Queue[*types.Event]) {
@@ -180,6 +181,7 @@ func clean(event *types.Event, now int64, pluginName string, pluginObj plugins.P
 	}
 	event.Labels["from_hostip"] = config.AgentIP()
 	event.Labels["from_hostname"] = config.AgentHostname()
+	event.Labels["from_agent"] = FromAgent
 
 	keys := make([]string, 0, len(event.Labels))
 	for k := range event.Labels {
@@ -200,4 +202,3 @@ func clean(event *types.Event, now int64, pluginName string, pluginObj plugins.P
 
 	return nil
 }
-

@@ -275,7 +275,7 @@ func (c *ConfigType) resolveGatewayConfig() error {
 }
 
 // Required global labels when server is enabled; all must be present and non-empty after expansion.
-var requiredGlobalLabels = []string{"from_agent", "from_hostname", "from_hostip"}
+var requiredGlobalLabels = []string{"from_hostname", "from_hostip"}
 
 func validateRequiredLabels(labels map[string]string) error {
 	for _, key := range requiredGlobalLabels {

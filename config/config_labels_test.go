@@ -217,7 +217,6 @@ func TestAgentLabels_OverridesLiveValues(t *testing.T) {
 	Config = &ConfigType{
 		Global: Global{
 			Labels: map[string]string{
-				"from_agent":    "catpaw",
 				"from_hostname": "my-host",
 				"from_hostip":   "10.0.0.1",
 			},
@@ -225,9 +224,6 @@ func TestAgentLabels_OverridesLiveValues(t *testing.T) {
 	}
 
 	labels := AgentLabels()
-	if labels["from_agent"] != "catpaw" {
-		t.Fatalf("expected from_agent=catpaw, got %q", labels["from_agent"])
-	}
 	if labels["from_hostname"] != "my-host" {
 		t.Fatalf("expected from_hostname=my-host, got %q", labels["from_hostname"])
 	}
